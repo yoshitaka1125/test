@@ -14,7 +14,7 @@
 // d5      →   D8
 // d6      →   D9
 // d7      →   D10
-
+//#define SERIAL_DEBUG
 #define CONFIG 0x1A
 #define ACCEL_XOUT_H 0x3B
 #define GYRO_XOUT_H 0x43
@@ -66,10 +66,6 @@ void get_gyro(float *gyro)
 }
 
 void setup() {
-  Serial.begin(9600);
-  while(!Serial);
-  Serial.println("---------------------------------------");
-
   //LCDの桁数と行数を指定する(16桁2行)
   lcd.begin(16,2);
  
@@ -101,12 +97,20 @@ void setup() {
 
   if (Wire.read() == 0x12) {
     lcd.print(" connect:OK");
-    Serial.println("OK");
   } else  {
     lcd.print(" connect:NG");
+  }
+  // Seial initilize
+#ifdef SERIAL_DEBUG
+  Serial.begin(9600);
+  while(!Serial);
+  Serial.println("---------------------------------------");
+  if (Wire.read() == 0x12) {\
+    Serial.println("OK");
+  } else  {\
     Serial.println("NG");
   }
-  
+#endif
   delay(1000);
 
   //TimerTc3.initialize(1000); //1000usタイマー
@@ -128,7 +132,7 @@ void loop() {
   accel_ave[1] = accel[1]/100;
   accel_ave[2] = accel[2]/100;
 
-  if(abs(accel_ave[0]) < 0.1)
+  if(abs(accel_ave[0]) > 0.8)           // close処理
   {
     if(open_f)
     {
@@ -137,12 +141,12 @@ void loop() {
       if(cnt>=300)
       {
         cnt = 0;
-        cnt_300 += 300;
+        cnt_300++;
       }
     }
     //while(abs(accel_ave[0]) < 0.9);
   }
-  else if(abs(accel_ave[0]) > 0.8)
+  else if(abs(accel_ave[0]) < 0.3)    // open処理
     open_f = 1;
 
   lcd.setCursor(0,0); //カーソルの位置を指定(0桁0行目の位置)
@@ -154,12 +158,18 @@ void loop() {
 
   
   lcd.setCursor(0,1); //カーソルの位置を指定(0桁1行目の位置)
-  lcd.print("cnt:");
+ /* lcd.print("cnt:");
   lcd.print(cnt);
   lcd.print("  ");
   lcd.print("cnt300:");
+  lcd.print(cnt_300);*/
+
+  lcd.print("cnt,cnt300=");
+  lcd.print(cnt);
+  lcd.print(",");
   lcd.print(cnt_300);
 
+#ifdef SERIAL_DEBUG
   Serial.print("ax:");
   Serial.print(accel_ave[0]);
   Serial.print(",");
@@ -182,5 +192,6 @@ void loop() {
   Serial.print(ang[1]);
   */
   Serial.println("");
-  delay(10);
+#endif
+  delay(1);
 }
