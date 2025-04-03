@@ -132,7 +132,7 @@ void loop() {
   accel_ave[1] = accel[1]/100;
   accel_ave[2] = accel[2]/100;
 
-  if(abs(accel_ave[0]) > 0.8)           // close処理
+  if(abs(accel_ave[2]) > 0.9)           // close処理
   {
     if(open_f)
     {
@@ -146,9 +146,10 @@ void loop() {
     }
     //while(abs(accel_ave[0]) < 0.9);
   }
-  else if(abs(accel_ave[0]) < 0.3)    // open処理
+  else if(abs(accel_ave[0]) < 0.15)    // open処理
     open_f = 1;
-
+  
+  lcd.clear();
   lcd.setCursor(0,0); //カーソルの位置を指定(0桁0行目の位置)
   lcd.print(accel_ave[0]);
   lcd.print(",");
